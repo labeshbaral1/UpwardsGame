@@ -8,8 +8,66 @@
 
 #define DEBUG(...) fprintf(stderr, "[          ] [ DEBUG ] "); fprintf(stderr, __VA_ARGS__); fprintf(stderr, " -- %s()\n", __func__)
 
+
+int count_rows(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("Error opening file");
+        return -1; 
+    }
+
+    int rows = 0;
+    char ch;
+    while ((ch = fgetc(file)) != EOF) {
+        if (ch == '\n') {
+            rows++;
+        }
+    }
+
+    fclose(file);
+    return rows;
+}
+
+int count_columns(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        perror("Error opening file");
+        return -1; 
+    }
+
+    int columns = 0;
+    char ch;
+    while ((ch = fgetc(file)) != EOF && ch != '\n') {
+        columns++;
+    }
+
+    fclose(file);
+    return columns;
+}
+
+
 GameState* initialize_game_state(const char *filename) {
     (void)filename;
+
+    FILE *file = fopen(filename, "r");
+
+    if(file == NULL){
+        printf("Error opening file");
+        return NULL;
+    }
+
+    printf("rows: %d cols: %d", count_rows(filename), count_columns(filename));
+    // GameState *state = (GameState *)malloc(sizeof(GameState));
+    // if (state == NULL) {
+    //     perror("Failed to allocate memory for game state");
+    //     fclose(file);
+    //     return NULL;
+    // }
+
+
+
+    fclose(file);
+
     return NULL;
 }
 
