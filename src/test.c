@@ -653,11 +653,8 @@ int main(void){
 
     GameState* game = initialize_game_state("input.txt");
     int num_tiles_placed = 0;  
-    game = place_tiles(game, 2, 3, 'V', "T PMAN", &num_tiles_placed);
-    game = place_tiles(game, 2, 5, 'V', "P TAL", &num_tiles_placed);
-    // game = place_tiles(game, 6, 1, 'H', "SN I", &num_tiles_placed);
-    // save_game_state(game, "output.txt");
-    game = place_tiles(game, 0, 0, 'V', "POTAL", &num_tiles_placed);
+    game = place_tiles(game, 3, 2, 'H', "C", &num_tiles_placed);
+
 
     save_game_state(game, "output.txt");
     free_game_state(game);

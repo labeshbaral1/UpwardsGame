@@ -362,7 +362,7 @@ void to_uppercase(char *str) {
     }
 }
 int is_word_legal(const char *word) {
-    FILE *file = fopen("words.txt", "r");
+    FILE *file = fopen("./tests/words.txt", "r");
     if (!file) {
         perror("Failed to open the words file");
         return 0; 
@@ -525,7 +525,7 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
 }
 int validate_place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed){
     (void) num_tiles_placed;
-    
+
     int length = strlen(tiles);
 
     if(length == 0){
