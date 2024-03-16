@@ -2,12 +2,10 @@
 
 
 
-
 typedef struct Tile{
     char* top;
     int height;
 } Tile;
-
 
 typedef struct GameState
 {
@@ -16,6 +14,9 @@ typedef struct GameState
     int cols;
 
 } GameState;
+
+
+
 
 GameState* initialize_game_state(const char *filename);
 GameState* place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed);
