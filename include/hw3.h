@@ -1,9 +1,17 @@
 #include <stdlib.h>
 
+
+
+
+typedef struct Tile{
+    char* top;
+    int height;
+} Tile;
+
+
 typedef struct GameState
 {
-
-    int **board;
+    Tile **board;
     int rows;
     int cols;
 

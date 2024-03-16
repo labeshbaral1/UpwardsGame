@@ -4,9 +4,55 @@
 #include <ctype.h>
 #include <assert.h>
 
-#include "hw3.h" 
 
-#define DEBUG(...) fprintf(stderr, "[          ] [ DEBUG ] "); fprintf(stderr, __VA_ARGS__); fprintf(stderr, " -- %s()\n", __func__)
+
+void assertFilesEqual(const char *file1Path, const char *file2Path) {
+    FILE *file1 = fopen(file1Path, "r");
+    FILE *file2 = fopen(file2Path, "r");
+    int ch1, ch2;
+
+    if (file1 == NULL || file2 == NULL) {
+        if (file1) fclose(file1);
+        if (file2) fclose(file2);
+        printf("Error opening files.\n");
+        exit(1); // Exit if either file couldn't be opened
+    }
+
+    while (1) {
+        ch1 = fgetc(file1);
+        ch2 = fgetc(file2);
+
+        if (ch1 != ch2) {
+            printf("Files are not equal.\n");
+            break; // Files are not equal
+        }
+
+        if (ch1 == EOF && ch2 == EOF) {
+            printf("Files are equal.\n");
+            break; // Reached the end of both files and they are equal
+        }
+    }
+
+    fclose(file1);
+    fclose(file2);
+}
+
+
+
+
+typedef struct Tile{
+    char* top;
+    int height;
+} Tile;
+
+
+typedef struct GameState
+{
+    Tile **board;
+    int rows;
+    int cols;
+
+} GameState;
 
 int count_rows(const char *filename) {
     FILE *file = fopen(filename, "r");
@@ -42,6 +88,7 @@ int count_columns(const char *filename) {
     fclose(file);
     return columns;
 }
+
 GameState* initialize_game_state(const char *filename) {
     (void)filename;
 
@@ -212,13 +259,12 @@ int is_word_legal(const char *word) {
     }
 
     fclose(file);
-    return 0; 
+    return 0; // Word not found
 }
 
 
 
 int validate_place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed){
-    (void) num_tiles_placed;
     int length = strlen(tiles);
 
     if(length == 0){
@@ -240,11 +286,12 @@ int validate_place_tiles(GameState *game, int row, int col, char direction, cons
                 printf("All tile characters must be uppercase");
                 return 0;
             }
-    }
     
 
+    
 
-return 1;
+    return 1;
+}
 
 }
 
@@ -283,6 +330,8 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
             if (game->board[row][col + i].height < 4 && tiles[i]!= ' ') {
                 game->board[row][col + i].height++;
                 *(game->board[row][col + i].top + game->board[row][col + i].height) = tiles[i];
+
+                printf("adding[%c]\n", tiles[i]);
                 (*num_tiles_placed)++;
             }
         }
@@ -331,7 +380,6 @@ void free_game_state(GameState *game) {
     free(game->board);
     free(game);
 }
-
 void save_game_state(GameState *game, const char *filename) {
 
     FILE *file = fopen(filename, "w");
@@ -368,3 +416,19 @@ void save_game_state(GameState *game, const char *filename) {
     fclose(file);
 }
 
+
+
+
+int main(void){
+
+    // GameState* game = initialize_game_state("ex.txt");
+    // int num_tiles_placed = 0;
+    // save_game_state(game, "ex-output01.txt");
+    // place_tiles(game, 2, 8, 'H', " ROID", &num_tiles_placed);
+    // save_game_state(game, "ex-output02.txt");
+
+
+
+    
+    return 0;
+}
