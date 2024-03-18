@@ -9,13 +9,15 @@
 int main(void) {
     int num_tiles_placed = 0;
 
-    
-	GameState *game = initialize_game_state("./tests/boards/board06.txt"); 
-    game = place_tiles(game, 2, 2, 'V', "LI TLESSNESS", &num_tiles_placed);
-    // save_game_state(game, actual_filename);
-    // printBoard(game);
+	GameState *game = initialize_game_state("./tests/boards/board01.txt"); 
+    printBoard(game);
 
-    printf("Placed Tiles: %d\n", num_tiles_placed);
+    game = place_tiles(game, 0, 2, 'V', "UNICED", &num_tiles_placed);
+
+
+    printBoard(game);
+    printf("TilesPlaced: %d\n", num_tiles_placed );
+
     free_game_state(game);
 
     return 0;

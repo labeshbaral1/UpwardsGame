@@ -16,6 +16,13 @@ typedef struct GameState
 } GameState;
 
 
+typedef struct GameHistory {
+    GameState **states; 
+    int size; 
+    int capacity;
+} GameHistory;
+
+
 
 
 GameState* initialize_game_state(const char *filename);
