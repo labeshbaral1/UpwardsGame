@@ -43,6 +43,17 @@ void printBoard(GameState *state) {
     printf("\n");
 }
 
+void printRow(Tile *row, int n){
+        for (int i = 0; i < n; i++) {
+                if (row[i].height > -1) {
+                    printf("%c", row[i].top[row[i].height]); 
+                } else {
+                    printf("."); 
+                }
+            }
+            printf("\n"); 
+}
+
 //Initializing the game state
 int count_rows(const char *filename) {
     FILE *file = fopen(filename, "r");
@@ -369,20 +380,33 @@ int is_word_legal(const char *word) {
     }
 
     char buffer[256];
+    char singularForm[256];
+    int wordLength = strlen(word);
+    int isPlural = word[wordLength - 1] == 'S'; 
+
+    if (isPlural && wordLength < 255) {
+        strncpy(singularForm, word, wordLength - 1);
+        singularForm[wordLength - 1] = '\0';
+    } else {
+        strncpy(singularForm, word, wordLength);
+        singularForm[wordLength] = '\0';
+    }
+
 
     while (fgets(buffer, sizeof(buffer), file)) {
-        buffer[strcspn(buffer, "\n")] = 0; 
+        buffer[strcspn(buffer, "\n")] = '\0';
         to_uppercase(buffer); 
 
-        if (strcmp(word, buffer) == 0) {
+        if (strcmp(word, buffer) == 0 || (isPlural && strcmp(singularForm, buffer) == 0)) {
             fclose(file);
-            return 1; 
+            return 1;
         }
     }
 
     fclose(file);
     return 0; 
 }
+
 int check_words_in_arr(Tile *row, int n) {
 
 
@@ -408,6 +432,9 @@ int check_words_in_arr(Tile *row, int n) {
         }
     }
 
+
+ 
+
     for (int i = 0; i < wordCount; i++) {
         if (!is_word_legal(words[i])) {
             for (int j = 0; j < wordCount; j++) {
@@ -420,6 +447,7 @@ int check_words_in_arr(Tile *row, int n) {
     for (int i = 0; i < wordCount; i++) {
         free(words[i]);
     }
+
 
     return 1; 
 }
@@ -435,11 +463,14 @@ int check_rows_and_cols(GameState *game) {
         }
 
         int isValid = check_words_in_arr(*rowTiles, game->cols);
-        free(rowTiles);
         if (!isValid) {
-            printf("Check Rows Failed\n");
+             printf("Check Rows Failed at \n");
+            printRow(*rowTiles, game->cols);
+            free(rowTiles);
             return 0;
         }
+        free(rowTiles);
+
     }
 
 
@@ -454,12 +485,17 @@ int check_rows_and_cols(GameState *game) {
                 tempCol[i] = *colTiles[i];
             }
 
+            
+
             int isValid = check_words_in_arr(tempCol, game->rows);
-            free(colTiles);
             if (!isValid) {
-                printf("Check Cols Failed\n");
+                printf("Check Cols Failed at \n");
+                printRow(tempCol, game->rows);
+                free(colTiles);
                 return 0; 
             }
+            free(colTiles);
+
         }
     return 1;
 }
@@ -513,7 +549,7 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
         }
     }
 
-
+    printBoard(temp);
     if (!check_rows_and_cols(temp)){
         return 0;
     }

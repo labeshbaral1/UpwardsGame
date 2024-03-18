@@ -23,3 +23,4 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
 GameState* undo_place_tiles(GameState *game);
 void free_game_state(GameState *game);
 void save_game_state(GameState *game, const char *filename);
+void printBoard(GameState *state);
