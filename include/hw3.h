@@ -18,6 +18,7 @@ typedef struct GameState
 
 typedef struct GameHistory {
     GameState **states; 
+    int top;
     int size; 
     int capacity;
 } GameHistory;
@@ -31,3 +32,5 @@ GameState* undo_place_tiles(GameState *game);
 void free_game_state(GameState *game);
 void save_game_state(GameState *game, const char *filename);
 void printBoard(GameState *state);
+
+void printGameHistory();
