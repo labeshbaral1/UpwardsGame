@@ -13,6 +13,44 @@
 GameHistory game_history = {0};
 
 
+
+//Methods for Clone and Freeing Game
+void clone_game(GameState *dest, const GameState *src){
+    dest->rows = src->rows;
+    dest->cols = src->cols;
+    dest->board = (Tile **)malloc(dest->rows * sizeof(Tile *));
+    for (int i = 0; i < dest->rows; i++) {
+        dest->board[i] = (Tile *)malloc(dest->cols * sizeof(Tile));
+        for (int j = 0; j < dest->cols; j++) {
+            dest->board[i][j].top = (char *)malloc(5 * sizeof(char)); 
+            dest->board[i][j].height = src->board[i][j].height;  
+                if (dest->board[i][j].height >= 0) {
+                    for(int k = 0; k <= dest->board[i][j].height;k++){
+                        *(dest->board[i][j].top + k) = *(src->board[i][j].top + k);
+                    }
+                }
+                           
+            }
+    }
+}
+
+void free_game(GameState *game) {
+    if (game == NULL) {
+        return;
+    }
+
+    for (int i = 0; i < game->rows; i++) {
+        for (int j = 0; j < game->cols; j++) {
+            free(game->board[i][j].top);
+        }
+        free(game->board[i]);
+    }
+
+    free(game->board);
+    free(game);
+}
+
+
 //Game History
 void initGameHistory(GameHistory *history, int initialCapacity) {
     history->states = (GameState **)malloc(initialCapacity * sizeof(GameState *));
@@ -20,8 +58,6 @@ void initGameHistory(GameHistory *history, int initialCapacity) {
     history->size = 0;
     history->capacity = initialCapacity;
 }
-
-
 GameState* peekTopGameState(const GameHistory *history) {
     if (history->top == -1) {
         printf("Game history is empty.\n");
@@ -29,8 +65,6 @@ GameState* peekTopGameState(const GameHistory *history) {
     }
     return history->states[history->top];
 }
-
-
 void pushGameState(GameHistory *history, GameState *state) {
     if (history->size == history->capacity) {
         int newCapacity = history->capacity * 2;
@@ -57,9 +91,6 @@ GameState* popGameState(GameHistory *history) {
     history->size--;
     return poppedState;
 }
-
-
-
 void printGameHistory(const GameHistory *history) {
     if (history->size == 0) {
         printf("No game history available.\n");
@@ -74,17 +105,25 @@ void printGameHistory(const GameHistory *history) {
         printf("____________________\n"); 
     }
 }
-
 void freeGameHistory(GameHistory *history) {
+    (void) history;
+    if (!history || !history->states) return;
+
     for (int i = 0; i <= history->top; i++) {
-        free_game_state(history->states[i]);
+        if (history->states[i]) {
+            free_game(history->states[i]);
+        }
     }
+
     free(history->states);
+
+
     history->states = NULL;
     history->top = -1;
     history->size = 0;
     history->capacity = 0;
 }
+
 
 
 
@@ -123,7 +162,6 @@ void printBoard(GameState *state) {
 
     printf("\n");
 }
-
 void printRow(Tile *row, int n){
         for (int i = 0; i < n; i++) {
                 if (row[i].height > -1) {
@@ -134,6 +172,8 @@ void printRow(Tile *row, int n){
             }
             printf("\n"); 
 }
+
+
 
 //Initializing the game state
 int count_rows(const char *filename) {
@@ -172,9 +212,7 @@ int count_columns(const char *filename) {
 }
 GameState* initialize_game_state(const char *filename) {
     
-    (void)filename;
 
-    
 
     FILE *file = fopen(filename, "r");
 
@@ -217,7 +255,7 @@ GameState* initialize_game_state(const char *filename) {
             free(state->board);
             free(state);
             fclose(file);
-            perror("Failed to allocate memory for board columns");
+            printf("Failed to allocate memory for board columns");
             return NULL;
         }
 
@@ -253,31 +291,34 @@ GameState* initialize_game_state(const char *filename) {
 
 
     initGameHistory(&game_history, 10);
+    GameState *temp = (GameState *)malloc(sizeof(GameState));
+    clone_game(temp, state);
 
+    pushGameState(&game_history, temp);
 
     return state;
 }
 
 
-
 //Save game
 void free_game_state(GameState *game) {
-
-    if(game == NULL){
+    if (game == NULL) {
         return;
     }
 
     for (int i = 0; i < game->rows; i++) {
         for (int j = 0; j < game->cols; j++) {
-            
             free(game->board[i][j].top);
         }
         free(game->board[i]);
-    }   
+    }
 
     free(game->board);
-    free(game);
+    // freeGameHistory(&game_history);
 }
+
+
+
 void save_game_state(GameState *game, const char *filename) {
 
     FILE *file = fopen(filename, "w");
@@ -312,7 +353,7 @@ void save_game_state(GameState *game, const char *filename) {
 
 
     fclose(file);
-    freeGameHistory(&game_history);
+
 }
 
 
@@ -364,24 +405,7 @@ void resize_board(GameState *game, int desired_width, int desired_height) {
     game->rows = desired_height;
     game->cols = desired_width;
 }
-void clone_game(GameState *dest, const GameState *src){
-    dest->rows = src->rows;
-    dest->cols = src->cols;
-    dest->board = (Tile **)malloc(dest->rows * sizeof(Tile *));
-    for (int i = 0; i < dest->rows; i++) {
-        dest->board[i] = (Tile *)malloc(dest->cols * sizeof(Tile));
-        for (int j = 0; j < dest->cols; j++) {
-            dest->board[i][j].top = (char *)malloc(5 * sizeof(char)); 
-            dest->board[i][j].height = src->board[i][j].height;  
-                if (dest->board[i][j].height >= 0) {
-                    for(int k = 0; k <= dest->board[i][j].height;k++){
-                        *(dest->board[i][j].top + k) = *(src->board[i][j].top + k);
-                    }
-                }
-                           
-            }
-    }
-}
+
 Tile** get_row(GameState *game, int row) {
 
     if (row < 0 || row >= game->rows) {
@@ -562,27 +586,25 @@ int check_rows_and_cols(GameState *game) {
 
 
 int valid_placement(GameState *game, int row, int col, char direction, const char *tiles){
-    GameState *temp = (GameState *)malloc(sizeof(GameState));
     int number_of_tiles_placed = 0;
-    clone_game(temp, game);
 
-     int length = strlen(tiles);
-        int desired_width = temp->cols;
-        int desired_height = temp->rows;
+        int length = strlen(tiles);
+        int desired_width = game->cols;
+        int desired_height = game->rows;
 
         
         if (direction == 'H' || direction == 'h') {
-            if (col + length > temp->cols) {
+            if (col + length > game->cols) {
                 desired_width = col + length;
             }
         } else if (direction == 'V' || direction == 'v') {
-            if (row + length > temp->rows) {
+            if (row + length > game->rows) {
                 desired_height = row + length; 
             }
         }
 
-        if (desired_width > temp->cols || desired_height > temp->rows) {
-            resize_board(temp, desired_width, desired_height);
+        if (desired_width > game->cols || desired_height > game->rows) {
+            resize_board(game, desired_width, desired_height);
         }
 
 
@@ -590,29 +612,27 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
     //Simulate placing the tiles
     if (direction == 'H' || direction == 'h') {
 
-        for (int i = 0; i < length && (col + i) < temp->cols; i++) {
-            if (temp->board[row][col + i].height < 4 && tiles[i]!= ' ') {
-                temp->board[row][col + i].height++;
-                *(temp->board[row][col + i].top + temp->board[row][col + i].height) = tiles[i];
+        for (int i = 0; i < length && (col + i) < game->cols; i++) {
+            if (game->board[row][col + i].height < 4 && tiles[i]!= ' ') {
+                game->board[row][col + i].height++;
+                *(game->board[row][col + i].top + game->board[row][col + i].height) = tiles[i];
                 number_of_tiles_placed++;
             }
         }
     } else if (direction == 'V' || direction == 'v') {
 
-        for (int i = 0; i < length && (row + i) < temp->rows; i++) {
-            if (temp->board[row + i][col].height < 4 && tiles[i]!= ' ') {
-                temp->board[row + i][col].height++;
-                *(temp->board[row + i][col].top + temp->board[row + i][col].height) = tiles[i];
+        for (int i = 0; i < length && (row + i) < game->rows; i++) {
+            if (game->board[row + i][col].height < 4 && tiles[i]!= ' ') {
+                game->board[row + i][col].height++;
+                *(game->board[row + i][col].top + game->board[row + i][col].height) = tiles[i];
                 number_of_tiles_placed++;
             }
         }
     }
 
-    if (!check_rows_and_cols(temp)){
+    if (!check_rows_and_cols(game)){
         return 0;
     }
-
-    free_game_state(temp);
 
     return 1;
 
@@ -651,6 +671,7 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
     *num_tiles_placed = 0;
 
     if(!validate_place_tiles(game, row, col, direction, tiles, num_tiles_placed)){
+        undo_place_tiles(game);
         return game;
     }
 
@@ -696,11 +717,9 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
 
     GameState *temp = (GameState *)malloc(sizeof(GameState));
     clone_game(temp, game);
-    pushGameState(&game_history, temp);
-    return game;
+    pushGameState(&game_history, game);
+    return temp;
 }
-
-
 
 
 
@@ -710,12 +729,9 @@ GameState* undo_place_tiles(GameState *game) {
         printf("No more moves to undo or initial state reached.\n");
         return game;
     }
-
-    GameState *curr_game = (GameState *)malloc(sizeof(GameState));
-    curr_game = popGameState(&game_history);
-    free_game_state(curr_game);
-
-    GameState *previous_state = peekTopGameState(&game_history);
     
-    return previous_state;
-}
+    popGameState(&game_history);
+
+    return peekTopGameState(&game_history);
+    
+    }
