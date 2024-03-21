@@ -31,7 +31,6 @@ int main(void) {
     // save_game_state(game, "./tests/actual_outputs/output.txt");
     // free_game_state(game);
 
-    // return 0;
     return 0;
 
     

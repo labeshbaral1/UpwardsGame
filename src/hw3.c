@@ -290,11 +290,11 @@ GameState* initialize_game_state(const char *filename) {
     fclose(file);
 
 
-    initGameHistory(&game_history, 10);
-    GameState *temp = (GameState *)malloc(sizeof(GameState));
-    clone_game(temp, state);
+    // initGameHistory(&game_history, 10);
+    // GameState *temp = (GameState *)malloc(sizeof(GameState));
+    // clone_game(temp, state);
 
-    pushGameState(&game_history, temp);
+    pushGameState(&game_history, state);
 
     return state;
 }
@@ -715,10 +715,10 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
         }
     }
 
-    GameState *temp = (GameState *)malloc(sizeof(GameState));
-    clone_game(temp, game);
-    pushGameState(&game_history, game);
-    return temp;
+    // GameState *temp = (GameState *)malloc(sizeof(GameState));
+    // clone_game(temp, game);
+    // pushGameState(&game_history, game);
+    return game;
 }
 
 
