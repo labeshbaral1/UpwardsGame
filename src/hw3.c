@@ -140,20 +140,21 @@ void printBoard(GameState *state) {
     for (int i = 0; i < state->rows; i++) {
 
         for (int j = 0; j < state->cols; j++) {
-            if(state->board[i][j].height == -1){
+            if(state->board[i][j].height <= 0){
                 printf(".");
             }
             else{
-            printf("%c", * ( (state->board[i][j].top) + state->board[i][j].height));
+            printf("%c", * ( state->board[i][j].top + (state->board[i][j].height-1)));
             }
         }
 
 
         printf("\n");
     }
+
     for (int i = 0; i < state->rows; i++) {
         for (int j = 0; j < state->cols; j++) {
-            printf("%d", (state->board[i][j].height)+1);
+            printf("%d", (state->board[i][j].height));
 
         }
             printf("\n");
@@ -164,16 +165,16 @@ void printBoard(GameState *state) {
 }
 
 
-// void printRow(Tile *row, int n){
-//         for (int i = 0; i < n; i++) {
-//                 if (row[i].height > -1) {
-//                     printf("%c", row[i].top[row[i].height]); 
-//                 } else {
-//                     printf("."); 
-//                 }
-//             }
-//             printf("\n"); 
-// }
+void printRow(Tile *row, int n){
+        for (int i = 0; i < n; i++) {
+                if (row[i].height > -1) {
+                    printf("%c", row[i].top[row[i].height]); 
+                } else {
+                    printf("."); 
+                }
+            }
+            printf("\n"); 
+}
 
 
 
@@ -270,11 +271,13 @@ GameState* initialize_game_state(const char *filename) {
                 printf("Failed to allocate memory for array of top");
                 return NULL;
             }
-            state->board[i][j].height = -1;
+            state->board[i][j].height = 0;
+            state->board[i][j].top[0] = '.';
         }
 
     }
 
+    // printBoard(state);
         int ch; 
         for (int i = 0; i < state->rows; i++) {
             for (int j = 0; j < state->cols; j++) {
@@ -283,8 +286,8 @@ GameState* initialize_game_state(const char *filename) {
                     j--; 
                     continue;
                 }
-                *(state->board[i][j].top + (state->board[i][j].height+1)) = (char)ch;
-                
+                *(state->board[i][j].top + (state->board[i][j].height)) = (char)ch;
+
                 if(ch != '.'){
                     state->board[i][j].height++;
                 }
@@ -334,11 +337,11 @@ void save_game_state(GameState *game, const char *filename) {
     
     for (int i = 0; i < game->rows; i++) {
         for (int j = 0; j < game->cols; j++) {
-            if(game->board[i][j].height == -1){
+            if(game->board[i][j].height == 0){
                 fprintf(file, "%c", (char)'.');
             }
             else{
-                fprintf(file, "%c", *(game->board[i][j].top + (game->board[i][j].height)));
+                fprintf(file, "%c", *(game->board[i][j].top + (game->board[i][j].height-1)));
             }
         }
         fprintf(file, "\n");
@@ -348,7 +351,7 @@ void save_game_state(GameState *game, const char *filename) {
 
     for (int i = 0; i < game->rows; i++) {
         for (int j = 0; j < game->cols; j++) {
-            fprintf(file, "%d", (game->board[i][j].height)+1);
+            fprintf(file, "%d", (game->board[i][j].height));
 
         }
             fprintf(file, "\n");
@@ -491,40 +494,37 @@ int is_word_legal(const char *word) {
     return 0; 
 }
 
+
 int check_words_in_arr(Tile *row, int n) {
+    char buffer[n + 1]; 
+    int wordCount = 0; 
+    char *words[n + 1]; 
+    int bufferIndex = 0; 
 
-
-    char *words[n+1]; 
-    int wordCount = 0;
-    char buffer[n + 1];
-    int bufferIndex = 0;
+    memset(buffer, 0, sizeof(buffer));
 
     for (int index = 0; index <= n; index++) {
-        
-        if (index == n || row[index].height == -1) { 
+        if (index == n || row[index].height == 0) {
             if (bufferIndex > 0) { 
-                buffer[bufferIndex] = '\0'; 
+                buffer[bufferIndex] = '\0';
                 words[wordCount] = strdup(buffer); 
-                wordCount++;
+               
+                wordCount++; 
                 bufferIndex = 0; 
             }
         } else {
-            if (row[index].height >= 0) {
-                buffer[bufferIndex++] = row[index].top[row[index].height];
-                buffer[bufferIndex] = '\0';
+            if (row[index].height > 0) {
+                buffer[bufferIndex++] = row[index].top[row[index].height - 1];
             }
         }
     }
 
-
- 
-
+    int valid = 1; 
     for (int i = 0; i < wordCount; i++) {
         if (!is_word_legal(words[i])) {
-            for (int j = 0; j < wordCount; j++) {
-                free(words[j]);
-            }
-            return 0; 
+            printf("Invalid word %d: %s\n", i, words[i]); 
+            valid = 0; 
+            break; 
         }
     }
 
@@ -532,10 +532,8 @@ int check_words_in_arr(Tile *row, int n) {
         free(words[i]);
     }
 
-
-    return 1; 
+    return valid; 
 }
-
 
 
 
@@ -546,10 +544,11 @@ int check_rows_and_cols(GameState *game) {
             continue;
         }
 
+
         int isValid = check_words_in_arr(*rowTiles, game->cols);
         if (!isValid) {
-             printf("Check Rows Failed at ");
-            // printRow(*rowTiles, game->cols);
+             printf("Check Rows Failed at row %d: ", row);
+            printRow(*rowTiles, game->cols);
             printf("\n");
             free(rowTiles);
             return 0;
@@ -617,8 +616,7 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
     if (direction == 'H' || direction == 'h') {
 
         for (int i = 0; i < length && (col + i) < game->cols; i++) {
-            if (game->board[row][col + i].height < 4 && tiles[i]!= ' ') {
-                game->board[row][col + i].height++;
+            if (game->board[row][col + i].height < 5 && tiles[i]!= ' ') {
                 *(game->board[row][col + i].top + game->board[row][col + i].height) = tiles[i];
                 number_of_tiles_placed++;
             }
@@ -626,8 +624,7 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
     } else if (direction == 'V' || direction == 'v') {
 
         for (int i = 0; i < length && (row + i) < game->rows; i++) {
-            if (game->board[row + i][col].height < 4 && tiles[i]!= ' ') {
-                game->board[row + i][col].height++;
+            if (game->board[row + i][col].height < 5 && tiles[i]!= ' ') {
                 *(game->board[row + i][col].top + game->board[row + i][col].height) = tiles[i];
                 number_of_tiles_placed++;
             }
@@ -668,12 +665,14 @@ int validate_place_tiles(GameState *game, int row, int col, char direction, cons
     }
     
     if(!valid_placement(game, row, col, direction, tiles)) return 0;
+
     return 1;
 }
 
 GameState* place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed) {
     *num_tiles_placed = 0;
 
+    
     if(!validate_place_tiles(game, row, col, direction, tiles, num_tiles_placed)){
         undo_place_tiles(game);
         return game;
@@ -702,22 +701,24 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
     if (direction == 'H' || direction == 'h') {
 
         for (int i = 0; i < length && (col + i) < game->cols; i++) {
-            if (game->board[row][col + i].height < 4 && tiles[i]!= ' ') {
-                game->board[row][col + i].height++;
+            if (game->board[row][col + i].height < 5 && tiles[i]!= ' ') {
                 *(game->board[row][col + i].top + game->board[row][col + i].height) = tiles[i];
+                game->board[row][col + i].height++;
                 (*num_tiles_placed)++;
             }
         }
     } else if (direction == 'V' || direction == 'v') {
 
         for (int i = 0; i < length && (row + i) < game->rows; i++) {
-            if (game->board[row + i][col].height < 4 && tiles[i]!= ' ') {
-                game->board[row + i][col].height++;
+            if (game->board[row + i][col].height < 5 && tiles[i]!= ' ') {
                 *(game->board[row + i][col].top + game->board[row + i][col].height) = tiles[i];
+                game->board[row + i][col].height++;
                 (*num_tiles_placed)++;
             }
         }
     }
+
+    
 
     // GameState *temp = (GameState *)malloc(sizeof(GameState));
     // clone_game(temp, game);
