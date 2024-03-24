@@ -15,24 +15,24 @@ GameHistory game_history = {0};
 
 
 //Methods for Clone and Freeing Game
-void clone_game(GameState *dest, const GameState *src){
-    dest->rows = src->rows;
-    dest->cols = src->cols;
-    dest->board = (Tile **)malloc(dest->rows * sizeof(Tile *));
-    for (int i = 0; i < dest->rows; i++) {
-        dest->board[i] = (Tile *)malloc(dest->cols * sizeof(Tile));
-        for (int j = 0; j < dest->cols; j++) {
-            dest->board[i][j].top = (char *)malloc(5 * sizeof(char)); 
-            dest->board[i][j].height = src->board[i][j].height;  
-                if (dest->board[i][j].height >= 0) {
-                    for(int k = 0; k <= dest->board[i][j].height;k++){
-                        *(dest->board[i][j].top + k) = *(src->board[i][j].top + k);
-                    }
-                }
+// void clone_game(GameState *dest, const GameState *src){
+//     dest->rows = src->rows;
+//     dest->cols = src->cols;
+//     dest->board = (Tile **)malloc(dest->rows * sizeof(Tile *));
+//     for (int i = 0; i < dest->rows; i++) {
+//         dest->board[i] = (Tile *)malloc(dest->cols * sizeof(Tile));
+//         for (int j = 0; j < dest->cols; j++) {
+//             dest->board[i][j].top = (char *)malloc(5 * sizeof(char)); 
+//             dest->board[i][j].height = src->board[i][j].height;  
+//                 if (dest->board[i][j].height >= 0) {
+//                     for(int k = 0; k <= dest->board[i][j].height;k++){
+//                         *(dest->board[i][j].top + k) = *(src->board[i][j].top + k);
+//                     }
+//                 }
                            
-            }
-    }
-}
+//             }
+//     }
+// }
 
 void free_game(GameState *game) {
     if (game == NULL) {
@@ -51,86 +51,86 @@ void free_game(GameState *game) {
 }
 
 
-//Game History
-void initGameHistory(GameHistory *history, int initialCapacity) {
-    history->states = (GameState **)malloc(initialCapacity * sizeof(GameState *));
-    history->top = -1; 
-    history->size = 0;
-    history->capacity = initialCapacity;
-}
-GameState* peekTopGameState(const GameHistory *history) {
-    if (history->top == -1) {
-        printf("Game history is empty.\n");
-        return NULL;
-    }
-    return history->states[history->top];
-}
-void pushGameState(GameHistory *history, GameState *state) {
-    if (history->size == history->capacity) {
-        int newCapacity = history->capacity * 2;
-        GameState **newStates = (GameState **)realloc(history->states, newCapacity * sizeof(GameState *));
-        if (newStates != NULL) {
-            history->states = newStates;
-            history->capacity = newCapacity;
-        } else {
-            perror("Failed to resize game history");
-            return;
-        }
-    }
-    history->top++;
-    history->states[history->top] = state;
-    history->size++;
-}
-GameState* popGameState(GameHistory *history) {
-    if (history->top == -1) {
-        printf("Game history is empty.\n");
-        return NULL;
-    }
-    GameState *poppedState = history->states[history->top];
-    history->top--;
-    history->size--;
-    return poppedState;
-}
-void printGameHistory(const GameHistory *history) {
-    if (history->size == 0) {
-        printf("No game history available.\n");
-        return;
-    }
+// //Game History
+// void initGameHistory(GameHistory *history, int initialCapacity) {
+//     history->states = (GameState **)malloc(initialCapacity * sizeof(GameState *));
+//     history->top = -1; 
+//     history->size = 0;
+//     history->capacity = initialCapacity;
+// }
+// GameState* peekTopGameState(const GameHistory *history) {
+//     if (history->top == -1) {
+//         printf("Game history is empty.\n");
+//         return NULL;
+//     }
+//     return history->states[history->top];
+// }
+// void pushGameState(GameHistory *history, GameState *state) {
+//     if (history->size == history->capacity) {
+//         int newCapacity = history->capacity * 2;
+//         GameState **newStates = (GameState **)realloc(history->states, newCapacity * sizeof(GameState *));
+//         if (newStates != NULL) {
+//             history->states = newStates;
+//             history->capacity = newCapacity;
+//         } else {
+//             perror("Failed to resize game history");
+//             return;
+//         }
+//     }
+//     history->top++;
+//     history->states[history->top] = state;
+//     history->size++;
+// }
+// GameState* popGameState(GameHistory *history) {
+//     if (history->top == -1) {
+//         printf("Game history is empty.\n");
+//         return NULL;
+//     }
+//     GameState *poppedState = history->states[history->top];
+//     history->top--;
+//     history->size--;
+//     return poppedState;
+// }
+// void printGameHistory(const GameHistory *history) {
+//     if (history->size == 0) {
+//         printf("No game history available.\n");
+//         return;
+//     }
 
-    printf("Game History:\n");
+//     printf("Game History:\n");
 
-    for (int i = history->top; i >= 0; i--) {
-        printf("Game State %d:\n", history->top - i + 1);
-        printBoard(history->states[i]); 
-        printf("____________________\n"); 
-    }
-}
-void freeGameHistory(GameHistory *history) {
-    (void) history;
-    if (!history || !history->states) return;
+//     for (int i = history->top; i >= 0; i--) {
+//         printf("Game State %d:\n", history->top - i + 1);
+//         printBoard(history->states[i]); 
+//         printf("____________________\n"); 
+//     }
+// }
+// void freeGameHistory(GameHistory *history) {
+//     (void) history;
+//     if (!history || !history->states) return;
 
-    for (int i = 0; i <= history->top; i++) {
-        if (history->states[i]) {
-            free_game(history->states[i]);
-        }
-    }
+//     for (int i = 0; i <= history->top; i++) {
+//         if (history->states[i]) {
+//             free_game(history->states[i]);
+//         }
+//     }
 
-    free(history->states);
-
-
-    history->states = NULL;
-    history->top = -1;
-    history->size = 0;
-    history->capacity = 0;
-}
+//     free(history->states);
 
 
+//     history->states = NULL;
+//     history->top = -1;
+//     history->size = 0;
+//     history->capacity = 0;
+// }
 
 
 
 
 
-//Helper functions for debugging
+
+
+// //Helper functions for debugging
 void printBoard(GameState *state) {
     if (state == NULL || state->board == NULL) {
         printf("The game state or board is not initialized.\n");
@@ -162,16 +162,18 @@ void printBoard(GameState *state) {
 
     printf("\n");
 }
-void printRow(Tile *row, int n){
-        for (int i = 0; i < n; i++) {
-                if (row[i].height > -1) {
-                    printf("%c", row[i].top[row[i].height]); 
-                } else {
-                    printf("."); 
-                }
-            }
-            printf("\n"); 
-}
+
+
+// void printRow(Tile *row, int n){
+//         for (int i = 0; i < n; i++) {
+//                 if (row[i].height > -1) {
+//                     printf("%c", row[i].top[row[i].height]); 
+//                 } else {
+//                     printf("."); 
+//                 }
+//             }
+//             printf("\n"); 
+// }
 
 
 
@@ -208,8 +210,11 @@ int count_columns(const char *filename) {
     }
 
     fclose(file);
+
     return columns;
 }
+
+
 GameState* initialize_game_state(const char *filename) {
     
 
@@ -294,7 +299,7 @@ GameState* initialize_game_state(const char *filename) {
     // GameState *temp = (GameState *)malloc(sizeof(GameState));
     // clone_game(temp, state);
 
-    pushGameState(&game_history, state);
+    // pushGameState(&game_history, state);
 
     return state;
 }
@@ -316,7 +321,6 @@ void free_game_state(GameState *game) {
     free(game->board);
     // freeGameHistory(&game_history);
 }
-
 
 
 void save_game_state(GameState *game, const char *filename) {
@@ -545,7 +549,7 @@ int check_rows_and_cols(GameState *game) {
         int isValid = check_words_in_arr(*rowTiles, game->cols);
         if (!isValid) {
              printf("Check Rows Failed at ");
-            printRow(*rowTiles, game->cols);
+            // printRow(*rowTiles, game->cols);
             printf("\n");
             free(rowTiles);
             return 0;
@@ -571,7 +575,7 @@ int check_rows_and_cols(GameState *game) {
             int isValid = check_words_in_arr(tempCol, game->rows);
             if (!isValid) {
                 printf("Check Cols Failed at ");
-                printRow(tempCol, game->rows);
+                // printRow(tempCol, game->rows);
                 printf("\n");
 
                 free(colTiles);
@@ -725,13 +729,17 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
 
 
 GameState* undo_place_tiles(GameState *game) {
-    if (game_history.size <= 1) { 
-        printf("No more moves to undo or initial state reached.\n");
-        return game;
-    }
-    
-    popGameState(&game_history);
+        (void) game;
 
-    return peekTopGameState(&game_history);
+    // if (game_history.size <= 1) { 
+    //     printf("No more moves to undo or initial state reached.\n");
+    //     return game;
+    // }
+    
+    // popGameState(&game_history);
+
+    // return peekTopGameState(&game_history);
+
+    return game;
     
     }
