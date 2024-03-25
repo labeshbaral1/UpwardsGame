@@ -19,7 +19,6 @@ typedef struct GameState
 typedef struct GameHistory {
     GameState **states; 
     int top;
-    int size; 
     int capacity;
 } GameHistory;
 
