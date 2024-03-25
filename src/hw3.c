@@ -74,10 +74,13 @@ GameState* popGameState(GameHistory *history) {
         printf("Game history is empty.\n");
         return NULL;
     }
+
     GameState *poppedState = history->states[history->top];
     history->top--;
     return poppedState;
 }
+
+
 void printGameHistory(const GameHistory *history) {
     if (history->top == -1) {
         printf("No game history available.\n");
@@ -622,6 +625,7 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
         return 0;
     }
 
+
     return 1;
 
 }
@@ -708,6 +712,8 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
 
     GameState *temp = (GameState *)malloc(sizeof(GameState));
     clone_game(temp, game);
+    
+    
     pushGameState(&game_history, temp);
     return game;
 }
@@ -717,13 +723,17 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
 
 GameState* undo_place_tiles(GameState *game) {
 
+    (void) game;
+
     if (game_history.top < 0) { 
         printf("No more moves to undo or initial state reached.\n");
         return game;
     }
     
-    popGameState(&game_history);
+    GameState *temp = popGameState(&game_history);
+    free_game_state(temp);
 
     return peekTopGameState(&game_history);
     
+    return game;
     }
