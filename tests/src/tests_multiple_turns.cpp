@@ -90,7 +90,8 @@ TEST_F(multiple_turns_TestSuite, multiple03)
 TEST_F(multiple_turns_TestSuite, multiple04)
 {
     INFO("Several successful placements of tiles");
-	GameState *game = initialize_game_state("./tests/boards/board02.txt");
+	
+GameState *game = initialize_game_state("./tests/boards/board02.txt");
     game = place_tiles(game, 4, 5, 'H', "BRAMBLEBERRY", &num_tiles_placed);
     EXPECT_EQ(num_tiles_placed, 12);
     game = undo_place_tiles(game);
@@ -115,7 +116,6 @@ TEST_F(multiple_turns_TestSuite, multiple04)
     EXPECT_EQ(num_tiles_placed, 12); 
     game = place_tiles(game, 5, 1, 'H', "AB", &num_tiles_placed);
     EXPECT_EQ(num_tiles_placed, 2); 
-
     save_game_state(game, actual_filename);
 
     const char *expected_filename = "./tests/expected_outputs/multiple04.txt"; 
