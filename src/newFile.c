@@ -570,8 +570,6 @@ int compare_ignore_spaces(const char *str1, const char *str2) {
         str1++;
         str2++;
     }
-
-    // printf("%s == %s \n", str1, str2, strcmp(str1, str2)); 
     return strcmp(str1, str2);
     }
 

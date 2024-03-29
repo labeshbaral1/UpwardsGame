@@ -50,6 +50,121 @@ int count_columns(const char *filename) {
 
     return columns;
 }
+void resize_board(GameState *game, int desired_width, int desired_height) {
+
+    Tile **new_board = (Tile **)malloc(desired_height * sizeof(Tile *));
+
+    if (new_board == NULL) {
+        printf("Failed to allocate memory for new board rows\n");
+        return;
+    }
+
+    for (int i = 0; i < desired_height; i++) {
+        new_board[i] = (Tile *)malloc(desired_width * sizeof(Tile));
+
+        if (new_board[i] == NULL) {
+            printf("Failed to allocate memory for new board columns\n");
+            for (int j = 0; j < i; j++) {
+                free(new_board[j]);
+            }
+            free(new_board);
+            return;
+        }
+
+        for (int j = 0; j < desired_width; j++) {
+            if (i < game->rows && j < game->cols) {
+                new_board[i][j] = game->board[i][j];
+            } else {
+                new_board[i][j].top = (char *)malloc(5 * sizeof(char)); 
+                if (new_board[i][j].top == NULL) {
+                    printf("Failed to allocate memory for tile top\n");
+                    for (int k = 0; k < j; k++) {
+                        free(new_board[i][k].top);
+                    }
+                    free(new_board[i]);
+                    for (int k = 0; k < i; k++) {
+                        free(new_board[k]);
+                    }
+                    free(new_board);
+                    return;
+                }
+                
+                *(new_board[i][j].top) = '.';
+                new_board[i][j].height = 0;
+            }
+        }
+    }
+
+    // free old board
+    for (int i = game->rows; i < desired_height; i++) {
+        for (int j = game->cols; j < desired_width; j++) {
+            free(new_board[i][j].top);
+        }
+    }
+
+    for (int i = 0; i < game->rows; i++) {
+        free(game->board[i]);
+    }
+    free(game->board);
+
+
+    game->board = new_board;
+    game->rows = desired_height;
+    game->cols = desired_width;
+}
+char* get_row(GameState *game, int row) {
+    if (row < 0 || row >= game->rows) {
+        return NULL;
+    }
+
+    char* rowString = malloc((game->cols + 1) * sizeof(char)); 
+    if (rowString == NULL) {
+        perror("Failed to allocate memory for rowString");
+        return NULL;
+    }
+
+    for (int col = 0; col < game->cols; col++) {
+        rowString[col] = game->board[row][col].height > 0 ? game->board[row][col].top[game->board[row][col].height - 1] : '.';
+    }
+    rowString[game->cols] = '\0'; 
+
+    return rowString;
+}
+char* get_col(GameState *game, int col) {
+    if (col < 0 || col >= game->cols) {
+        return NULL; 
+    }
+    
+    char *colString = malloc((game->rows + 1) * sizeof(char));
+    if (colString == NULL) {
+        perror("Failed to allocate memory for colString");
+        return NULL;
+    }
+
+    for (int row = 0; row < game->rows; row++) {
+        colString[row] = game->board[row][col].height > 0 ? game->board[row][col].top[game->board[row][col].height - 1] : '.';
+    }
+    colString[game->rows] = '\0';
+
+    return colString;
+}
+void to_uppercase(char *str) {
+    for (int i = 0; str[i]; i++) {
+        str[i] = toupper((unsigned char)str[i]);
+    }
+}
+int compare_ignore_spaces(const char *str1, const char *str2) {
+
+    while (*str2 == ' ') { 
+        str1++;
+        str2++;
+    }
+    return strcmp(str1, str2);
+    }
+
+
+
+
 
 
 
@@ -138,18 +253,118 @@ GameState* initialize_game_state(const char *filename){
 }
 
 
+
+int valid_placement(GameState *game, int row, int col, char direction, const char *tiles, int* num_tiles){
+    
+    int number_of_tiles_placed = 0;
+
+        int length = strlen(tiles);
+        int desired_width = game->cols;
+        int desired_height = game->rows;
+
+        
+        if (direction == 'H' || direction == 'h') {
+            if (col + length > game->cols) {
+                desired_width = col + length;
+            }
+        } else if (direction == 'V' || direction == 'v') {
+            if (row + length > game->rows) {
+                desired_height = row + length; 
+            }
+        }
+
+        if (desired_width > game->cols || desired_height > game->rows) {
+            resize_board(game, desired_width, desired_height);
+        }
+
+
+
+    //Simulate placing the tiles
+    if (direction == 'H' || direction == 'h') {
+
+        for (int i = 0; i < length && (col + i) < game->cols; i++) {
+            if (game->board[row][col + i].height < 5 && tiles[i]!= ' ') {
+                *(game->board[row][col + i].top + game->board[row][col + i].height) = tiles[i];
+                game->board[row][col+i].height++;
+                number_of_tiles_placed++;
+            }
+        }
+    } else if (direction == 'V' || direction == 'v') {
+
+        for (int i = 0; i < length && (row + i) < game->rows; i++) {
+            if (game->board[row + i][col].height < 5 && tiles[i]!= ' ') {                          //where to change stacking doesnt increase count
+                *(game->board[row + i][col].top + game->board[row + i][col].height) = tiles[i];   
+                game->board[row + i][col].height++;
+                number_of_tiles_placed++;
+
+            }
+        }
+    }
+
+
+   
+    // if (!check_rows_and_cols(game, tiles, length)){
+    //     return 0;
+    // }   
+
+
+    *num_tiles = number_of_tiles_placed;
+
+
+    return 1;
+
+}
+
+
+int validate_place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed){
+    (void) num_tiles_placed;
+    int length = strlen(tiles);
+
+    if(length == 0){
+            printf("No tiles given\n");
+            return 0;
+     }
+
+    if (!(direction == 'H' || direction == 'h' || direction == 'V' || direction == 'v')){
+        printf("Invalid Direction of movement %c", direction);
+        return 0;
+    }
+
+    //ensure that row,col is within bounds
+    if (row < 0 || row >= game->rows || col < 0 || col >= game->cols) {
+        printf("Position out of bounds: (%d, %d)\n", row, col);
+        return 0;
+    }
+    
+    //all tiles are uppercase
+
+    for(int i = 0; tiles[i]!='\0'; i++){
+            if (tiles[i] != ' ' && !isupper(tiles[i])){
+                printf("All tile characters must be uppercase");
+                return 0;
+            }
+    }
+    
+    
+    if(!valid_placement(game, row, col, direction, tiles, num_tiles_placed)) return 0;
+    return 1;
+}
+
 GameState* place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed){
-    (void) row;
-    (void) col;
-    (void) direction;
-    (void) tiles;
-    (void) num_tiles_placed
-    ;
-    return game;
+    *num_tiles_placed = 0;
+
+    
+    if(!validate_place_tiles(game, row, col, direction, tiles, num_tiles_placed)){
+        return game;
+    }
+
+    printf("Tiles Sucessfully Placed\n");
+    return game;    
 }
 
 
 GameState* undo_place_tiles(GameState *game){
+    
     return game;
 }
 
@@ -205,4 +420,10 @@ void save_game_state(GameState *game, const char *filename){
 
 
     fclose(file);
+}
+
+
+
+void test(GameState *game){
+    (void) game;
 }
