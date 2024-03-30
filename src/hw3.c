@@ -254,8 +254,130 @@ GameState* initialize_game_state(const char *filename){
 
 
 
+
+//HELPER FOR PLACING TILES
+int is_word_legal(const char *word) {
+    FILE *file = fopen("./tests/words.txt", "r");
+    if (!file) {
+        perror("Failed to open the words file");
+        return 0; 
+    }
+
+    char buffer[256];
+    char singularForm[256];
+    int wordLength = strlen(word);
+    int isPlural = word[wordLength - 1] == 'S'; 
+
+    if (isPlural && wordLength < 255) {
+        strncpy(singularForm, word, wordLength - 1);
+        singularForm[wordLength - 1] = '\0';
+    } else {
+        strncpy(singularForm, word, wordLength);
+        singularForm[wordLength] = '\0';
+    }
+
+
+    while (fgets(buffer, sizeof(buffer), file)) {
+        buffer[strcspn(buffer, "\n")] = '\0';
+        to_uppercase(buffer); 
+
+        if (strcmp(word, buffer) == 0 || (isPlural && strcmp(singularForm, buffer) == 0)) {
+            fclose(file);
+            return 1;
+        }
+    }
+
+    fclose(file);
+    return 0; 
+}
+
+int check_words_in_arr(char *row, int n) {
+
+    char buffer[n+1]; 
+    int wordCount = 0; 
+    int bufferIndex = 0; 
+
+    int valid = 1; 
+
+    for (int index = 0; index <= n; index++) {
+        if (row[index] == '\0' || row[index] == '.') { 
+            if (bufferIndex > 0) { 
+                buffer[bufferIndex] = '\0';
+                
+                if (!is_word_legal(buffer)) {
+                    printf("Tiles cannot be placed as it results in an invalid word %d: %s\n", wordCount, buffer); 
+                    valid = 0; 
+                    break;
+                }
+
+            
+                bufferIndex = 0; 
+                wordCount++;
+            }
+        } else {
+            buffer[bufferIndex++] = row[index]; 
+        }
+    }
+
+    return valid; 
+}
+
+int check_rows_and_cols(GameState *game) {
+
+    (void) game;
+
+
+    for (int row = 0; row < game->rows; row++) {
+        char* rowTiles = get_row(game, row);
+        if (rowTiles == NULL) {
+            break;
+        }
+
+
+        int isValid = check_words_in_arr(rowTiles, game->cols);
+
+
+        if (!isValid) {
+            printf("Check Rows Failed at row %d: ", row);
+            printf("%s\n", rowTiles);
+            free(rowTiles);
+            return 0;
+        }
+
+        free(rowTiles);
+
+    }
+
+   
+
+    for (int col = 0; col < game->cols; col++) {
+        char* colTiles = get_col(game, col);
+
+        if (colTiles == NULL) {
+            break;
+        }
+
+
+        int isValid = check_words_in_arr(colTiles, game->rows);
+
+
+        if (!isValid) {
+            printf("Check Cols Failed at col %d: ", col);
+            printf("%s\n", colTiles);
+            free(colTiles);
+            return 0;
+        }
+
+        free(colTiles);
+
+        }
+
+
+    return 1;
+}
+
 int valid_placement(GameState *game, int row, int col, char direction, const char *tiles, int* num_tiles){
-    
+
     int number_of_tiles_placed = 0;
 
         int length = strlen(tiles);
@@ -302,10 +424,9 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
     }
 
 
-   
-    // if (!check_rows_and_cols(game, tiles, length)){
-    //     return 0;
-    // }   
+    if (!check_rows_and_cols(game)){
+        return 0;
+    }   
 
 
     *num_tiles = number_of_tiles_placed;
@@ -350,8 +471,16 @@ int validate_place_tiles(GameState *game, int row, int col, char direction, cons
     return 1;
 }
 
+
+
 GameState* place_tiles(GameState *game, int row, int col, char direction, const char *tiles, int *num_tiles_placed){
     *num_tiles_placed = 0;
+    
+    (void) row;
+    (void) col;
+    (void) direction;
+    (void) tiles;
+
 
     
     if(!validate_place_tiles(game, row, col, direction, tiles, num_tiles_placed)){
@@ -425,5 +554,7 @@ void save_game_state(GameState *game, const char *filename){
 
 
 void test(GameState *game){
-    (void) game;
+
+    printf("%d", check_rows_and_cols(game));
+   
 }
