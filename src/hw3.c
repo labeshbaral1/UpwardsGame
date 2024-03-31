@@ -402,38 +402,51 @@ GameState* initialize_game_state(const char *filename){
 
 //HELPER FOR PLACING TILES
 int is_word_legal(const char *word) {
-    FILE *file = fopen("./tests/words.txt", "r");
-    if (!file) {
+    FILE *indexFile = fopen("./tests/words.idx", "rb");
+    if (!indexFile) {
+        perror("Failed to open the index file");
+        return 0;
+    }
+
+    FILE *wordsFile = fopen("./tests/words.txt", "r");
+    if (!wordsFile) {
         perror("Failed to open the words file");
-        return 0; 
+        fclose(indexFile);
+        return 0;
     }
 
-    char buffer[256];
-    char singularForm[256];
-    int wordLength = strlen(word);
-    int isPlural = word[wordLength - 1] == 'S'; 
+    long left = 0;
+    fseek(indexFile, 0, SEEK_END);
+    long right = ftell(indexFile) / sizeof(long) - 1;
+    char currentWord[256];
+    
+    while (left <= right) {
+        long mid = left + (right - left) / 2;
+        long offset;
 
-    if (isPlural && wordLength < 255) {
-        strncpy(singularForm, word, wordLength - 1);
-        singularForm[wordLength - 1] = '\0';
-    } else {
-        strncpy(singularForm, word, wordLength);
-        singularForm[wordLength] = '\0';
-    }
+        fseek(indexFile, mid * sizeof(long), SEEK_SET);
+        fread(&offset, sizeof(long), 1, indexFile);
+        fseek(wordsFile, offset, SEEK_SET);
+        fgets(currentWord, sizeof(currentWord), wordsFile);
+        currentWord[strcspn(currentWord, "\n")] = '\0'; 
+        to_uppercase(currentWord); 
 
-
-    while (fgets(buffer, sizeof(buffer), file)) {
-        buffer[strcspn(buffer, "\n")] = '\0';
-        to_uppercase(buffer); 
-
-        if (strcmp(word, buffer) == 0 || (isPlural && strcmp(singularForm, buffer) == 0)) {
-            fclose(file);
+        int cmp = strcmp(word, currentWord);
+        if (cmp == 0) {
+            // Word found
+            fclose(indexFile);
+            fclose(wordsFile);
             return 1;
+        } else if (cmp < 0) {
+            right = mid - 1;
+        } else {
+            left = mid + 1;
         }
     }
 
-    fclose(file);
-    return 0; 
+    fclose(indexFile);
+    fclose(wordsFile);
+    return 0;
 }
 
 int check_words_in_arr(char *row, int n) {
@@ -611,57 +624,70 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
     //Simulate placing the tiles
     if (direction == 'H' || direction == 'h') {
 
+
         for (int i = 0; i < length && (col + i) < game->cols; i++) {
 
 
               if(col-1 >= 0 && game->board[row][col-1].height > 0){
                     intersecting_word = 1;
+                            printf("intersecting here1");
+
                 }
 
             if (game->board[row][col + i].height < 5 && tiles[i]!= ' ') {
 
                 if(game->board[row][col+i].height > 0){
                     intersecting_word = 1;
+                            printf("intersecting here2");
+
                 }
 
                
                 *(game->board[row][col + i].top + game->board[row][col + i].height) = tiles[i];
                 game->board[row][col+i].height++;
                 number_of_tiles_placed++;
+                 if(col+i+1 < game->cols && game->board[row][col+i+1].height > 0){
+                    intersecting_word = 1;
+                            printf("intersecting here3");
+
+                }
             }
         }
 
-            if(col+1 < game->cols && game->board[row][col+1].height > 0){
-                    intersecting_word = 1;
-                }
+
 
     } else if (direction == 'V' || direction == 'v') {
+
         
-        if(row-1 >= 0 && game->board[row-1][col].height > 0){
-                    intersecting_word = 1;
-                }
 
         for (int i = 0; i < length && (row + i) < game->rows; i++) {
+
               if(row-1 > 0 && game->board[row-1][col].height > 0){
                     intersecting_word = 1;
                 }
 
-            if (game->board[row + i][col].height < 5 && tiles[i]!= ' ') {                          //where to change stacking doesnt increase count
+                if (game->board[row + i][col].height < 5 && tiles[i]!= ' ') {                          //where to change stacking doesnt increase count
                 
                 if(game->board[row+i][col].height > 0){
                     intersecting_word = 1;
+                            printf("intersecting here5");
+
                 }
 
                 *(game->board[row + i][col].top + game->board[row + i][col].height) = tiles[i];   
                 game->board[row + i][col].height++;
                 number_of_tiles_placed++;
 
+                if(row+i+1 < game->rows && game->board[row+i+1][col].height > 0){
+                    intersecting_word = 1;
+                            printf("intersecting here6");
+
+                }
+
             }
         }
 
-          if(row+1 < game->rows && game->board[row+1][col].height > 0){
-                    intersecting_word = 1;
-                }
+        
     }
 
 
