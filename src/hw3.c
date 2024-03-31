@@ -433,7 +433,7 @@ int is_word_legal(const char *word) {
     return 0; 
 }
 
-int check_words_in_arr(char *row, int n, const char* tiles) {
+int check_words_in_arr(char *row, int n) {
 
     char buffer[n+1]; 
     int wordCount = 0; 
@@ -453,7 +453,33 @@ int check_words_in_arr(char *row, int n, const char* tiles) {
                     break;
                 }
                 
-                // printf("%s==%s\n", buffer, tiles);
+
+            
+                bufferIndex = 0; 
+                wordCount++;
+            }
+        } else {
+            buffer[bufferIndex++] = row[index]; 
+        }
+    }
+
+    return valid; 
+}
+
+int brand_new_word_check(char *row, int n, const char* tiles) {
+
+    char buffer[n+1]; 
+    int wordCount = 0; 
+    int bufferIndex = 0; 
+
+    int valid = 0; 
+
+    for (int index = 0; index <= n; index++) {
+        if (row[index] == '\0' || row[index] == '.') { 
+            if (bufferIndex > 0) { 
+                buffer[bufferIndex] = '\0';
+
+
                 if(strcmp(buffer, tiles) == 0){
                     
                     if(first_word){
@@ -461,8 +487,7 @@ int check_words_in_arr(char *row, int n, const char* tiles) {
                     }
                     else{
                         printf("failed trying to add brand new word to the board");
-                        valid = 0;
-
+                        valid = 1;
 
                     }
                 }
@@ -502,7 +527,7 @@ int check_unique(GameState* game){
     
     }
 
-int check_rows_and_cols(GameState *game, const char* tiles) {
+int check_rows_and_cols(GameState *game) {
 
     (void) game;
 
@@ -514,7 +539,7 @@ int check_rows_and_cols(GameState *game, const char* tiles) {
         }
 
 
-        int isValid = check_words_in_arr(rowTiles, game->cols, tiles);
+        int isValid = check_words_in_arr(rowTiles, game->cols);
 
 
         if (!isValid) {
@@ -538,7 +563,7 @@ int check_rows_and_cols(GameState *game, const char* tiles) {
         }
 
 
-        int isValid = check_words_in_arr(colTiles, game->rows, tiles);
+        int isValid = check_words_in_arr(colTiles, game->rows);
 
 
         if (!isValid) {
@@ -610,7 +635,7 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
 
 
 
-    if (!check_rows_and_cols(game, tiles)){
+    if (!check_rows_and_cols(game)){
         return 0;
     }   
 
@@ -618,10 +643,18 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
 
     if (direction == 'H' || direction == 'h') {
         char* rowTiles = get_row(game, row);
+        if(brand_new_word_check(rowTiles, game->cols, tiles)) {        
+            free(rowTiles);
+             return 0;
+}
         free(rowTiles);
 
     } else if (direction == 'V' || direction == 'v') {
         char* colTiles = get_col(game, col);
+         if(brand_new_word_check(colTiles, game->rows, tiles)) {        
+            free(colTiles);
+             return 0;
+        }
         free(colTiles);
 
 
