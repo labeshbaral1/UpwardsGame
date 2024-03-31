@@ -397,13 +397,74 @@ GameState* initialize_game_state(const char *filename){
     return state;
 }
 
-
-
-int is_word_legal(const char* word){
-    (void) word;
-    return 1;
+void adjust_to_line_start(FILE *file, long mid) {
+    if (mid == 0) { // If at start, no adjustment needed.
+        fseek(file, 0, SEEK_SET);
+        return;
+    }
+    
+    char ch;
+    fseek(file, mid, SEEK_SET);
+    while ((ch = fgetc(file)) != '\n') {
+        if (ftell(file) <= 1) { // Handle being at start after decrement
+            fseek(file, 0, SEEK_SET);
+            return;
+        }
+        fseek(file, -2, SEEK_CUR); // Step back to find '\n'
+    }
 }
 
+int binary_search_word(FILE *file, const char *target, long start, long end) {
+    char line[256];
+    long prevMid = -1; // Track previous mid to avoid infinite loop
+    while (start < end) {
+        long mid = start + (end - start) / 2;
+        
+        if (mid == prevMid) { // Avoid infinite loop by breaking if mid doesn't change
+            break;
+        }
+        prevMid = mid;
+        
+        adjust_to_line_start(file, mid);
+        
+        if (!fgets(line, sizeof(line), file)) {
+            break; // Handle EOF or read error
+        }
+        line[strcspn(line, "\n")] = '\0'; // Trim newline
+        to_uppercase(line);
+        
+        int cmp = strcmp(target, line);
+        if (cmp == 0) { // Word found
+            return 1;
+        } else if (cmp > 0) {
+            start = ftell(file);
+        } else {
+            end = mid;
+        }
+    }
+    return 0; // Word not found
+}
+
+int is_word_legal(const char *word) {
+    FILE *file = fopen("./tests/words.txt", "r");
+    if (!file) {
+        perror("Failed to open the words file");
+        return 0;
+    }
+
+    char targetWord[256];
+    strncpy(targetWord, word, 255);
+    targetWord[255] = '\0';
+    to_uppercase(targetWord);
+
+    fseek(file, 0, SEEK_END);
+    long fileSize = ftell(file);
+
+    int result = binary_search_word(file, targetWord, 0, fileSize - 1);
+
+    fclose(file);
+    return result;
+}
 int check_words_in_arr(char *row, int n) {
 
     char buffer[n+1]; 
@@ -811,10 +872,8 @@ void save_game_state(GameState *game, const char *filename){
 
 
 
-void test(GameState *game){
+void test(){
 
-    (void) game;
-
-    // printf("%d", check_rows_and_cols(game));
+    printf("%d", is_word_legal("SSDAD"));
    
 }
