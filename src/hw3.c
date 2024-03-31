@@ -414,6 +414,7 @@ void adjust_to_line_start(FILE *file, long mid) {
     }
 }
 
+
 int binary_search_word(FILE *file, const char *target, long start, long end) {
     char line[256];
     long prevMid = -1; // Track previous mid to avoid infinite loop
@@ -434,7 +435,7 @@ int binary_search_word(FILE *file, const char *target, long start, long end) {
         to_uppercase(line);
         
         int cmp = strcmp(target, line);
-        if (cmp == 0) { // Word found
+        if (cmp == 0) { 
             return 1;
         } else if (cmp > 0) {
             start = ftell(file);
@@ -465,6 +466,7 @@ int is_word_legal(const char *word) {
     fclose(file);
     return result;
 }
+
 int check_words_in_arr(char *row, int n) {
 
     char buffer[n+1]; 
@@ -649,12 +651,12 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
 
                 }
 
-            if (game->board[row][col + i].height < 5 && tiles[i]!= ' ') {
-
-                if(game->board[row][col+i].height > 0){
+                 if(game->board[row][col+i].height > 0){
                     intersecting_word = 1;
 
                 }
+
+            if (game->board[row][col + i].height < 5 && tiles[i]!= ' ') {
 
                
                 *(game->board[row][col + i].top + game->board[row][col + i].height) = tiles[i];
@@ -681,21 +683,18 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
                     intersecting_word = 1;
                 }
 
-                if (game->board[row + i][col].height < 5 && tiles[i]!= ' ') {                          //where to change stacking doesnt increase count
-                
                 if(game->board[row+i][col].height > 0){
-                    intersecting_word = 1;
-                            printf("intersecting here5");
+                                intersecting_word = 1;
 
-                }
+                            }
 
+                if (game->board[row + i][col].height < 5 && tiles[i]!= ' ') {                          //where to change stacking doesnt increase count
                 *(game->board[row + i][col].top + game->board[row + i][col].height) = tiles[i];   
                 game->board[row + i][col].height++;
                 number_of_tiles_placed++;
 
                 if(row+i+1 < game->rows && game->board[row+i+1][col].height > 0){
                     intersecting_word = 1;
-                            printf("intersecting here6");
 
                 }
 
