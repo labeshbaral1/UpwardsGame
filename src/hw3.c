@@ -449,12 +449,13 @@ int check_words_in_arr(char *row, int n) {
 
 int check_unique(GameState* game){
     if (game == NULL || game->board == NULL) {
-        return 0; // Invalid game state
+
     }
-    
+
+
     for (int i = 0; i < game->rows; i++) {
         for (int j = 0; j < game->cols; j++) {
-            if (game->board[i][j].top != NULL && game->board[i][j].height > 2) {
+            if (game->board[i][j].top != NULL && game->board[i][j].height >= 2) {
                 if (*(game->board[i][j].top + game->board[i][j].height - 1) ==
                     *(game->board[i][j].top + game->board[i][j].height - 2)) {
                     return 0;
