@@ -596,6 +596,7 @@ int validate_place_tiles(GameState *game, int row, int col, char direction, cons
 
     if(first_word){
        if( length <= 2) return 0;  
+       first_word = 0;
     }
 
     if (!(direction == 'H' || direction == 'h' || direction == 'V' || direction == 'v')){
