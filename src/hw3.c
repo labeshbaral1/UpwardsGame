@@ -11,7 +11,7 @@
 
 
 GameHistory game_history = {0};
-
+int first_word = 1;
 
 
 
@@ -593,6 +593,10 @@ int validate_place_tiles(GameState *game, int row, int col, char direction, cons
             printf("No tiles given\n");
             return 0;
      }
+
+    if(first_word){
+       if( length <= 2) return 0;  
+    }
 
     if (!(direction == 'H' || direction == 'h' || direction == 'V' || direction == 'v')){
         printf("Invalid Direction of movement %c", direction);
