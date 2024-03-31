@@ -457,15 +457,34 @@ int is_word_legal(const char *word) {
     strncpy(targetWord, word, 255);
     targetWord[255] = '\0';
     to_uppercase(targetWord);
+    char singularForm[256];
+    int wordLength = strlen(word);
+
+    
+    int isPlural = word[wordLength - 1] == 'S'; 
+
+    if (isPlural && wordLength < 255) {
+        strncpy(singularForm, word, wordLength - 1);
+        singularForm[wordLength - 1] = '\0';
+    } else {
+        strncpy(singularForm, word, wordLength);
+        singularForm[wordLength] = '\0';
+    }
+
 
     fseek(file, 0, SEEK_END);
     long fileSize = ftell(file);
 
     int result = binary_search_word(file, targetWord, 0, fileSize - 1);
+    if(isPlural){
+        result = result || binary_search_word(file, singularForm, 0, fileSize - 1);
+    }
 
     fclose(file);
     return result;
 }
+
+
 
 int check_words_in_arr(char *row, int n) {
 
