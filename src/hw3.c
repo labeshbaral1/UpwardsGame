@@ -445,6 +445,28 @@ int check_words_in_arr(char *row, int n) {
     return valid; 
 }
 
+
+
+int check_unique(GameState* game){
+    if (game == NULL || game->board == NULL) {
+        return 0; // Invalid game state
+    }
+    
+    for (int i = 0; i < game->rows; i++) {
+        for (int j = 0; j < game->cols; j++) {
+            if (game->board[i][j].top != NULL && game->board[i][j].height > 2) {
+                if (*(game->board[i][j].top + game->board[i][j].height - 1) ==
+                    *(game->board[i][j].top + game->board[i][j].height - 2)) {
+                    return 0;
+                }
+            }
+        }
+    }
+   
+    return 1; 
+    
+    }
+
 int check_rows_and_cols(GameState *game) {
 
     (void) game;
@@ -550,6 +572,8 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
     if (!check_rows_and_cols(game)){
         return 0;
     }   
+
+    if(!check_unique(game)) return 0;
 
 
     *num_tiles = number_of_tiles_placed;
