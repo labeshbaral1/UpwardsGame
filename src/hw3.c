@@ -17,6 +17,8 @@ int first_word = 0;
 
 
 int is_first_word(GameState *game){
+
+
     for (int i = 0; i < game->rows; i++) {
         for (int j = 0; j < game->cols; j++) {
             if (game->board[i][j].height != 0) {
@@ -24,6 +26,7 @@ int is_first_word(GameState *game){
             }
         }
     }
+    
     return 1; 
 }
 
@@ -481,14 +484,11 @@ int brand_new_word_check(char *row, int n, const char* tiles) {
 
 
                 if(strcmp(buffer, tiles) == 0){
+                    printf("%s, %s", buffer, tiles);
                     
                     if(first_word){
                         first_word = 0;
-                    }
-                    else{
-                        printf("failed trying to add brand new word to the board");
-                        valid = 1;
-
+                        if(strlen(buffer) <= 2) valid = 1;
                     }
                 }
 
@@ -585,6 +585,7 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
 
     int number_of_tiles_placed = 0;
 
+    int intersecting_word = 0;
 
         int length = strlen(tiles);
         int desired_width = game->cols;
@@ -611,7 +612,17 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
     if (direction == 'H' || direction == 'h') {
 
         for (int i = 0; i < length && (col + i) < game->cols; i++) {
+
+
+              if(col-1 >= 0 && game->board[row][col-1].height > 0){
+                    intersecting_word = 1;
+                }
+
             if (game->board[row][col + i].height < 5 && tiles[i]!= ' ') {
+
+                if(game->board[row][col+i].height > 0){
+                    intersecting_word = 1;
+                }
 
                
                 *(game->board[row][col + i].top + game->board[row][col + i].height) = tiles[i];
@@ -619,11 +630,27 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
                 number_of_tiles_placed++;
             }
         }
+
+            if(col+1 < game->cols && game->board[row][col+1].height > 0){
+                    intersecting_word = 1;
+                }
+
     } else if (direction == 'V' || direction == 'v') {
+        
+        if(row-1 >= 0 && game->board[row-1][col].height > 0){
+                    intersecting_word = 1;
+                }
 
         for (int i = 0; i < length && (row + i) < game->rows; i++) {
+              if(row-1 > 0 && game->board[row-1][col].height > 0){
+                    intersecting_word = 1;
+                }
+
             if (game->board[row + i][col].height < 5 && tiles[i]!= ' ') {                          //where to change stacking doesnt increase count
                 
+                if(game->board[row+i][col].height > 0){
+                    intersecting_word = 1;
+                }
 
                 *(game->board[row + i][col].top + game->board[row + i][col].height) = tiles[i];   
                 game->board[row + i][col].height++;
@@ -631,6 +658,10 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
 
             }
         }
+
+          if(row+1 < game->rows && game->board[row+1][col].height > 0){
+                    intersecting_word = 1;
+                }
     }
 
 
@@ -658,6 +689,11 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
         free(colTiles);
 
 
+    }
+
+    if(!intersecting_word){
+        printf("not intersecting");
+        return 0;
     }
 
 
@@ -733,6 +769,7 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
 GameState* undo_place_tiles(GameState *game){
     
     return game;
+    
 }
 
 
@@ -788,6 +825,9 @@ void save_game_state(GameState *game, const char *filename){
     // free_history();
     fclose(file);
 }
+
+
+
 
 
 

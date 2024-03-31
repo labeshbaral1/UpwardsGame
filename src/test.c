@@ -652,10 +652,7 @@ GameState* undo_place_tiles(GameState *game) {
 int main(void){
     
     char *actual_filename = "./tests/actual_outputs/test_output.txt";
-
-
-
-
+    
     GameState* game = initialize_game_state("input.txt");
     int num_tiles_placed = 0;  
     game = place_tiles(game, 3, 2, 'H', "C", &num_tiles_placed);
