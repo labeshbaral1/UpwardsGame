@@ -8,9 +8,9 @@ int main(void) {
     int num_tiles_placed = 0;
 
 
-	GameState *game = initialize_game_state("./tests/boards/board02.txt"); 
+	GameState *game = initialize_game_state("./tests/boards/board05.txt"); 
 
-    game = place_tiles(game, 0, 0, 'H', "I", &num_tiles_placed);
+    game = place_tiles(game, 0, 0, 'H', "CAT", &num_tiles_placed);
     printf("PLACED %d tiles: expected 0 tiles\n", num_tiles_placed);
 
 

@@ -414,7 +414,7 @@ int is_word_legal(const char *word) {
     return 0; 
 }
 
-int check_words_in_arr(char *row, int n) {
+int check_words_in_arr(char *row, int n, const char* tiles) {
 
     char buffer[n+1]; 
     int wordCount = 0; 
@@ -426,11 +426,26 @@ int check_words_in_arr(char *row, int n) {
         if (row[index] == '\0' || row[index] == '.') { 
             if (bufferIndex > 0) { 
                 buffer[bufferIndex] = '\0';
+
                 
                 if (!is_word_legal(buffer)) {
                     printf("Tiles cannot be placed as it results in an invalid word %d: %s\n", wordCount, buffer); 
                     valid = 0; 
                     break;
+                }
+                
+                // printf("%s==%s\n", buffer, tiles);
+                if(strcmp(buffer, tiles) == 0){
+                    
+                    // if(first_word){
+                    //     first_word = 0;
+                    // }
+                    // else{
+                        printf("failed trying to add brand new word to the board");
+                        valid = 0;
+
+
+                    // }
                 }
 
             
@@ -468,7 +483,7 @@ int check_unique(GameState* game){
     
     }
 
-int check_rows_and_cols(GameState *game) {
+int check_rows_and_cols(GameState *game, const char* tiles) {
 
     (void) game;
 
@@ -480,7 +495,7 @@ int check_rows_and_cols(GameState *game) {
         }
 
 
-        int isValid = check_words_in_arr(rowTiles, game->cols);
+        int isValid = check_words_in_arr(rowTiles, game->cols, tiles);
 
 
         if (!isValid) {
@@ -504,7 +519,7 @@ int check_rows_and_cols(GameState *game) {
         }
 
 
-        int isValid = check_words_in_arr(colTiles, game->rows);
+        int isValid = check_words_in_arr(colTiles, game->rows, tiles);
 
 
         if (!isValid) {
@@ -525,6 +540,7 @@ int check_rows_and_cols(GameState *game) {
 int valid_placement(GameState *game, int row, int col, char direction, const char *tiles, int* num_tiles){
 
     int number_of_tiles_placed = 0;
+
 
         int length = strlen(tiles);
         int desired_width = game->cols;
@@ -552,6 +568,8 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
 
         for (int i = 0; i < length && (col + i) < game->cols; i++) {
             if (game->board[row][col + i].height < 5 && tiles[i]!= ' ') {
+
+               
                 *(game->board[row][col + i].top + game->board[row][col + i].height) = tiles[i];
                 game->board[row][col+i].height++;
                 number_of_tiles_placed++;
@@ -561,6 +579,8 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
 
         for (int i = 0; i < length && (row + i) < game->rows; i++) {
             if (game->board[row + i][col].height < 5 && tiles[i]!= ' ') {                          //where to change stacking doesnt increase count
+                
+
                 *(game->board[row + i][col].top + game->board[row + i][col].height) = tiles[i];   
                 game->board[row + i][col].height++;
                 number_of_tiles_placed++;
@@ -570,11 +590,23 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
     }
 
 
-    if (!check_rows_and_cols(game)){
+
+    if (!check_rows_and_cols(game, tiles)){
         return 0;
     }   
 
     if(!check_unique(game)) return 0;
+
+    if (direction == 'H' || direction == 'h') {
+        char* rowTiles = get_row(game, row);
+        free(rowTiles);
+
+    } else if (direction == 'V' || direction == 'v') {
+        char* colTiles = get_col(game, col);
+        free(colTiles);
+
+
+    }
 
 
     *num_tiles = number_of_tiles_placed;
@@ -594,10 +626,7 @@ int validate_place_tiles(GameState *game, int row, int col, char direction, cons
             return 0;
      }
 
-    if(first_word){
-       if( length <= 2) return 0;  
-       first_word = 0;
-    }
+    
 
     if (!(direction == 'H' || direction == 'h' || direction == 'V' || direction == 'v')){
         printf("Invalid Direction of movement %c", direction);
