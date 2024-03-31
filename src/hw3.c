@@ -201,25 +201,26 @@ void printBoard(GameState *state) {
 }
 
 
-// void clone_game(GameState *dest, GameState *src){
+void clone_game(GameState *dest, GameState *src){
 
 
-//     dest->rows = src->rows;
-//     dest->cols = src->cols;
-//     dest->board = (Tile **)malloc(dest->rows * sizeof(Tile *));
-//     for (int i = 0; i < dest->rows; i++) {
-//         dest->board[i] = (Tile *)malloc(dest->cols * sizeof(Tile));
-//         for (int j = 0; j < dest->cols; j++) {
-//             dest->board[i][j].top = (char *)malloc(5 * sizeof(char)); 
-//             dest->board[i][j].height = src->board[i][j].height;  
-//                 if (dest->board[i][j].height >= 0) {
-//                     for(int k = 0; k <= dest->board[i][j].height;k++){
-//                         *(dest->board[i][j].top + k) = *(src->board[i][j].top + k);
-//                     }
-//                 }
+    dest->rows = src->rows;
+    dest->cols = src->cols;
+    dest->board = (Tile **)malloc(dest->rows * sizeof(Tile *));
+    for (int i = 0; i < dest->rows; i++) {
+        dest->board[i] = (Tile *)malloc(dest->cols * sizeof(Tile));
+        for (int j = 0; j < dest->cols; j++) {
+            dest->board[i][j].top = (char *)malloc(5 * sizeof(char)); 
+            dest->board[i][j].height = src->board[i][j].height;  
+                if (dest->board[i][j].height >= 0) {
+                    for(int k = 0; k <= dest->board[i][j].height;k++){
+                        *(dest->board[i][j].top + k) = *(src->board[i][j].top + k);
+                    }
+                }
                            
-//             }
-//     }
+            }
+    }
+    }
 
 
 //     // printf("comparing dest and src\n");
@@ -602,13 +603,18 @@ GameState* place_tiles(GameState *game, int row, int col, char direction, const 
     (void) direction;
     (void) tiles;
 
+    GameState *temp = (GameState *)malloc(sizeof(GameState));
+    clone_game(temp, game);
+    
 
     
     if(!validate_place_tiles(game, row, col, direction, tiles, num_tiles_placed)){
-        return game;
+        free_game_state(game);
+        return temp;
     }
 
     printf("Tiles Sucessfully Placed\n");
+    free_game_state(temp);
     return game;    
 }
 
