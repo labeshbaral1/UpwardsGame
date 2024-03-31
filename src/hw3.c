@@ -11,7 +11,22 @@
 
 
 GameHistory game_history = {0};
-int first_word = 1;
+int first_word = 0;
+
+
+
+
+int is_first_word(GameState *game){
+    for (int i = 0; i < game->rows; i++) {
+        for (int j = 0; j < game->cols; j++) {
+            if (game->board[i][j].height != 0) {
+                return 0; 
+            }
+        }
+    }
+    return 1; 
+}
+
 
 
 
@@ -367,6 +382,10 @@ GameState* initialize_game_state(const char *filename){
 
     fclose(file);
 
+    if(is_first_word(state)){
+        first_word = 1;
+    }
+
     // GameState *temp = (GameState *)malloc(sizeof(GameState));
     // clone_game(temp, state);
     // push_game_state(temp);
@@ -437,15 +456,15 @@ int check_words_in_arr(char *row, int n, const char* tiles) {
                 // printf("%s==%s\n", buffer, tiles);
                 if(strcmp(buffer, tiles) == 0){
                     
-                    // if(first_word){
-                    //     first_word = 0;
-                    // }
-                    // else{
+                    if(first_word){
+                        first_word = 0;
+                    }
+                    else{
                         printf("failed trying to add brand new word to the board");
                         valid = 0;
 
 
-                    // }
+                    }
                 }
 
             
