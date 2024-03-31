@@ -11,7 +11,7 @@ int main(void) {
 	GameState *game = initialize_game_state("./tests/boards/board04.txt"); 
 
     game = place_tiles(game, 6, 14, 'H', "ER", &num_tiles_placed);
-    // printf("PLACED %d tiles: expected 5 tiles\n", num_tiles_placed);
+    printf("PLACED %d tiles: expected 5 tiles\n", num_tiles_placed);
 
 
     // // game = place_tiles(game, 2, 5, 'V', "P TAL", &num_tiles_placed);
