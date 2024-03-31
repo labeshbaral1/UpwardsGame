@@ -14,6 +14,12 @@ GameHistory game_history = {0};
 
 
 
+
+
+
+
+
+
 //Helper
 int count_rows(const char *filename) {
     FILE *file = fopen(filename, "r");
@@ -161,6 +167,117 @@ int compare_ignore_spaces(const char *str1, const char *str2) {
     }
     return strcmp(str1, str2);
     }
+    
+void printBoard(GameState *state) {
+    if (state == NULL || state->board == NULL) {
+        printf("The game state or board is not initialized.\n");
+        return;
+    }
+    
+    for (int i = 0; i < state->rows; i++) {
+
+        for (int j = 0; j < state->cols; j++) {
+            if(state->board[i][j].height == 0){
+                printf(".");
+            }
+            else{
+            printf("%c", * ( (state->board[i][j].top) + state->board[i][j].height-1));
+            }
+        }
+
+
+        printf("\n");
+    }
+    for (int i = 0; i < state->rows; i++) {
+        for (int j = 0; j < state->cols; j++) {
+            printf("%d", (state->board[i][j].height));
+
+        }
+            printf("\n");
+        }
+
+
+    printf("\n");
+}
+
+
+// void clone_game(GameState *dest, GameState *src){
+
+
+//     dest->rows = src->rows;
+//     dest->cols = src->cols;
+//     dest->board = (Tile **)malloc(dest->rows * sizeof(Tile *));
+//     for (int i = 0; i < dest->rows; i++) {
+//         dest->board[i] = (Tile *)malloc(dest->cols * sizeof(Tile));
+//         for (int j = 0; j < dest->cols; j++) {
+//             dest->board[i][j].top = (char *)malloc(5 * sizeof(char)); 
+//             dest->board[i][j].height = src->board[i][j].height;  
+//                 if (dest->board[i][j].height >= 0) {
+//                     for(int k = 0; k <= dest->board[i][j].height;k++){
+//                         *(dest->board[i][j].top + k) = *(src->board[i][j].top + k);
+//                     }
+//                 }
+                           
+//             }
+//     }
+
+
+//     // printf("comparing dest and src\n");
+//     // printBoard(dest);
+//     // printf("\n");
+//     // printBoard(src);
+// }
+
+
+
+
+
+// //Game History
+// void history() {
+//     const int initialCapacity = 10;  
+//     game_history.states = (GameState **)malloc(initialCapacity * sizeof(GameState *));
+//     game_history.capacity = initialCapacity;
+// }
+// void push_game_state(GameState *state) {
+//     if (game_history.top == game_history.capacity) {
+//         game_history.capacity *= 2;
+//         game_history.states = (GameState **)realloc(game_history.states, game_history.capacity * sizeof(GameState *));
+//     }
+//     game_history.states[++game_history.top] = state;
+// }
+// GameState *pop_game_state() {
+
+//     if (game_history.top == -1) {
+//         return NULL; 
+//     }
+//     return game_history.states[game_history.top--];
+// }
+
+
+// void print_game_history() {
+ 
+
+//     // for (int i = 0; i <= game_history.top; i++) {
+//     //     if (game_history.states[i] != NULL) {
+//     //         printf("State %d:\n", i);
+//     //         printBoard(game_history.states[i]);
+//     //         printf("\n"); 
+//     //     }
+//     // }
+// }
+
+
+// void free_history() {
+//     for (int i = 0; i <= game_history.top; i++) {
+//         free(game_history.states[i]); 
+//     }
+
+//     free(game_history.states);  
+//     game_history.states = NULL;
+//     game_history.top = -1;
+//     game_history.capacity = 0;
+// }
+
 
 
 
@@ -174,7 +291,7 @@ GameState* initialize_game_state(const char *filename){
     FILE *file = fopen(filename, "r");
 
     if(file == NULL){
-        printf("Error opening file");
+        printf("Error opening file to initialize game");
         return NULL;
     }
 
@@ -248,6 +365,11 @@ GameState* initialize_game_state(const char *filename){
         }
 
     fclose(file);
+
+    // GameState *temp = (GameState *)malloc(sizeof(GameState));
+    // clone_game(temp, state);
+    // push_game_state(temp);
+
 
     return state;
 }
@@ -458,7 +580,6 @@ int validate_place_tiles(GameState *game, int row, int col, char direction, cons
     }
     
     //all tiles are uppercase
-
     for(int i = 0; tiles[i]!='\0'; i++){
             if (tiles[i] != ' ' && !isupper(tiles[i])){
                 printf("All tile characters must be uppercase");
@@ -546,8 +667,8 @@ void save_game_state(GameState *game, const char *filename){
             fprintf(file, "\n");
         }
 
-
-
+    // print_game_history();
+    // free_history();
     fclose(file);
 }
 
@@ -555,6 +676,8 @@ void save_game_state(GameState *game, const char *filename){
 
 void test(GameState *game){
 
-    printf("%d", check_rows_and_cols(game));
+    (void) game;
+
+    // printf("%d", check_rows_and_cols(game));
    
 }
