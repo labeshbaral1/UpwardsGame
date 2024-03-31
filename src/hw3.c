@@ -399,54 +399,9 @@ GameState* initialize_game_state(const char *filename){
 
 
 
-
-//HELPER FOR PLACING TILES
-int is_word_legal(const char *word) {
-    FILE *indexFile = fopen("./tests/words.idx", "rb");
-    if (!indexFile) {
-        perror("Failed to open the index file");
-        return 0;
-    }
-
-    FILE *wordsFile = fopen("./tests/words.txt", "r");
-    if (!wordsFile) {
-        perror("Failed to open the words file");
-        fclose(indexFile);
-        return 0;
-    }
-
-    long left = 0;
-    fseek(indexFile, 0, SEEK_END);
-    long right = ftell(indexFile) / sizeof(long) - 1;
-    char currentWord[256];
-    
-    while (left <= right) {
-        long mid = left + (right - left) / 2;
-        long offset;
-
-        fseek(indexFile, mid * sizeof(long), SEEK_SET);
-        fread(&offset, sizeof(long), 1, indexFile);
-        fseek(wordsFile, offset, SEEK_SET);
-        fgets(currentWord, sizeof(currentWord), wordsFile);
-        currentWord[strcspn(currentWord, "\n")] = '\0'; 
-        to_uppercase(currentWord); 
-
-        int cmp = strcmp(word, currentWord);
-        if (cmp == 0) {
-            // Word found
-            fclose(indexFile);
-            fclose(wordsFile);
-            return 1;
-        } else if (cmp < 0) {
-            right = mid - 1;
-        } else {
-            left = mid + 1;
-        }
-    }
-
-    fclose(indexFile);
-    fclose(wordsFile);
-    return 0;
+int is_word_legal(const char* word){
+    (void) word;
+    return 1;
 }
 
 int check_words_in_arr(char *row, int n) {
@@ -630,7 +585,6 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
 
               if(col-1 >= 0 && game->board[row][col-1].height > 0){
                     intersecting_word = 1;
-                            printf("intersecting here1");
 
                 }
 
@@ -638,7 +592,6 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
 
                 if(game->board[row][col+i].height > 0){
                     intersecting_word = 1;
-                            printf("intersecting here2");
 
                 }
 
@@ -646,6 +599,7 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
                 *(game->board[row][col + i].top + game->board[row][col + i].height) = tiles[i];
                 game->board[row][col+i].height++;
                 number_of_tiles_placed++;
+
                  if(col+i+1 < game->cols && game->board[row][col+i+1].height > 0){
                     intersecting_word = 1;
                             printf("intersecting here3");
