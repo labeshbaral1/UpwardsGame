@@ -26,7 +26,7 @@ int is_first_word(GameState *game){
             }
         }
     }
-    
+    printf("first Word");
     return 1; 
 }
 
@@ -460,7 +460,7 @@ int is_word_legal(const char *word) {
     char singularForm[256];
     int wordLength = strlen(word);
 
-    
+
     int isPlural = word[wordLength - 1] == 'S'; 
 
     if (isPlural && wordLength < 255) {
@@ -534,10 +534,8 @@ int brand_new_word_check(char *row, int n, const char* tiles) {
 
 
                 if(strcmp(buffer, tiles) == 0){
-                    printf("%s, %s", buffer, tiles);
                     
                     if(first_word){
-                        first_word = 0;
                         if(strlen(buffer) <= 2) valid = 1;
                     }
                 }
@@ -751,8 +749,10 @@ int valid_placement(GameState *game, int row, int col, char direction, const cha
     }
 
     if(!intersecting_word){
-        printf("not intersecting");
+        if(!first_word){
         return 0;
+        }
+        first_word = 0;
     }
 
 
