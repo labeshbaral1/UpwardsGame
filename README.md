@@ -3,7 +3,7 @@
 
 ## Responsibilities
 
-This project implements a subset of the classic game Upwords as part of the CSE 220: Systems Fundamentals I course at Stony Brook University. The core responsibilities of this project include:
+This project implements a subset of the classic game Upwords. The core responsibilities of this project include:
 
 - **Memory Management**: Efficient allocation and deallocation of dynamic memory for the game state.
 - **Struct Usage**: Working with simple structs to manage the game state and tile placements.
@@ -64,7 +64,3 @@ After building, you can run the game simulation or tests:
 ```
 
 ---
-
-### Academic Integrity
-
-Remember to adhere to the academic honesty policy of your institution when using this README and associated project code.
