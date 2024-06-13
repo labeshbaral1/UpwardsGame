@@ -9,10 +9,10 @@ This project implements a subset of the classic game Upwords. The core responsib
 - **Struct Usage**: Working with simple structs to manage the game state and tile placements.
 - **Game Mechanics**: Implementation of custom game logic to place tiles according to specified rules, grow the game board dynamically, and undo tile placements.
 
-## Technologies / C++ Concepts Used
+## Technologies / C Concepts Used
 
 ### Language Used
-C++
+C
 
 ### Key Concepts
 - **Dynamic Memory Allocation**: Managing game state in memory, ensuring efficient use and avoidance of memory leaks.
