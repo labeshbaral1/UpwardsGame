@@ -91,10 +91,13 @@ In this implementation of Upwords, the game is simplified to focus on tile place
 
 
 ### Screenshots of key features
+
 Example of GameBoard Expansion
+
 <img width="849" alt="image" src="https://github.com/labeshbaral1/UpwardsGame/assets/99603007/616b7275-aef3-4a8d-aa9c-abcd6e05fca3">
 
 Example of undoing a move
+
 <img width="573" alt="image" src="https://github.com/labeshbaral1/UpwardsGame/assets/99603007/d944940d-80b4-4385-a0d9-8c82145a78df">
 
 
